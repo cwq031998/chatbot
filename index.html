@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Interface</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+    .chat-container {
+      width: 400px;
+      margin: 50px auto;
+      background-color: #fff;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .chat-header {
+      padding: 10px;
+      background-color: #2c7ef2;
+      color: white;
+      text-align: center;
+    }
+    .chat-body {
+      padding: 10px;
+      height: 400px;
+      overflow-y: scroll;
+      background-color: #f9f9f9;
+    }
+    .chat-message {
+      margin: 5px 0;
+    }
+    .bot-message {
+      background-color: #d0ebff;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 80%;
+      float: left;
+    }
+    .user-message {
+      background-color: #c8ffc8;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 80%;
+      float: right;
+    }
+    .clear {
+      clear: both;
+    }
+    .chat-footer {
+      padding: 10px;
+      background-color: #efefef;
+      display: flex;
+      justify-content: space-between;
+    }
+    .chat-input {
+      width: 85%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .send-button {
+      width: 10%;
+      background-color: #2c7ef2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    Tianjin Skin Care Center Chatbot
+  </div>
+  <div class="chat-body" id="chat-body">
+    <!-- Chat messages will appear here -->
+  </div>
+  <div class="chat-footer">
+    <input type="text" id="chat-input" class="chat-input" placeholder="Type your message...">
+    <button class="send-button" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  let responses = [
+    { trigger: "价格", response: "祛痘体验仅需16元，50分钟8大流程，帮您解决各种痘痘粉刺问题，留电/微信立即帮您预约" },
+    { trigger: "祛痘", response: "亲，可以先简单描述下您脸部的问题，我这边好根据您的具体情况，为您分析解答一下。" },
+    { trigger: "咨询", response: "您好，咨询都是免费的，您可以按照方法尝试改善起来。" }
+    // Add more triggers based on the data in your Excel sheet
+  ];
+
+  let customerResponded = false; // Tracks if customer responded
+  let timeoutId; // Store the timeout ID for continuous messages
+
+  // Function to send message on button click
+  function sendMessage() {
+    const chatInput = document.getElementById('chat-input');
+    const userMessage = chatInput.value;
+    if (userMessage.trim() === '') return;
+
+    // Append user's message to the chat
+    appendMessage(userMessage, 'user');
+
+    // Clear the input field
+    chatInput.value = '';
+
+    // Simulate bot reply (find in Excel data)
+    setTimeout(() => {
+      const botReply = getBotReply(userMessage);
+      appendMessage(botReply, 'bot');
+    }, 1000); // Simulate typing delay
+
+    customerResponded = true; // Set flag to true after user input
+    clearTimeout(timeoutId); // Clear the timeout for continuous messages
+  }
+
+  // Function to get a bot reply based on keyword triggers
+  function getBotReply(userInput) {
+    // Convert user input to lowercase for better matching
+    userInput = userInput.toLowerCase();
+
+    // Iterate over the responses to find a match
+    for (let i = 0; i < responses.length; i++) {
+      if (userInput.includes(responses[i].trigger)) {
+        return responses[i].response;
+      }
+    }
+
+    // Fallback message if no triggers match
+    return "Sorry, I don't understand. Could you please clarify?";
+  }
+
+  // Function to append message to the chat
+  function appendMessage(message, sender) {
+    const chatBody = document.getElementById('chat-body');
+    const messageElement = document.createElement('div');
+    messageElement.className = 'chat-message ' + (sender === 'bot' ? 'bot-message' : 'user-message');
+    messageElement.innerText = message;
+
+    // Add message and clear float
+    chatBody.appendChild(messageElement);
+    chatBody.appendChild(document.createElement('div')).className = 'clear';
+
+    // Scroll to the bottom
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  // Automatically send a greeting message when the page is opened
+  window.onload = function() {
+    sendGreeting();
+  };
+
+  // Function to continuously send greeting messages if no user response
+  function sendGreeting() {
+    const greetingMessage = "您好！欢迎使用祛痘咨询服务，有任何问题请随时告诉我。";
+    appendMessage(greetingMessage, 'bot');
+
+    // Set timeout to send another greeting after 3 seconds if no response
+    timeoutId = setTimeout(function() {
+      if (!customerResponded) {
+        sendGreeting(); // Recursively call the greeting function if no response
+      }
+    }, 3000); // 3 seconds interval
+  }
+
+</script>
+
+</body>
+</html>
